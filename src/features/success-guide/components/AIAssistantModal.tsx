@@ -312,14 +312,14 @@ export function AIAssistantModal({ isOpen, onClose, stepTitle, stepId }: AIAssis
                 </div>
 
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-white/10 bg-white/5 pt-5">
+                <div className="flex items-center justify-between p-4 border-b border-white/10 bg-white/5 pt-5 relative">
                     <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-full border-2 border-primary/50 flex items-center justify-center relative shadow-neon-primary overflow-hidden bg-black">
-                            <img src={NIKOLA_IMAGE} alt="Nikola" className="w-full h-full object-cover opacity-90" />
+                            <img src={NIKOLA_IMAGE} alt="Albert" className="w-full h-full object-cover opacity-90" />
                             <div className="absolute top-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-[#0a0f1c] animate-pulse"></div>
                         </div>
                         <div>
-                            <h3 className="text-white font-bold leading-tight flex items-center gap-2">Asistente Nikola</h3>
+                            <h3 className="text-white font-bold leading-tight flex items-center gap-2">El Oráculo (Albert)</h3>
                             <div className="flex items-center gap-2">
                                 <p className="text-[10px] text-primary uppercase font-bold tracking-widest leading-none">Paso {stepId}</p>
                                 <span className="text-[10px] text-white/40">•</span>
@@ -327,10 +327,78 @@ export function AIAssistantModal({ isOpen, onClose, stepTitle, stepId }: AIAssis
                             </div>
                         </div>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={onClose} className="text-white/50 hover:text-white rounded-full">
-                        <X size={20} />
-                    </Button>
+                    <div className="flex items-center gap-1">
+                        {/* Voice Control Toggle */}
+                        <div className="flex items-center bg-black/40 rounded-full border border-white/10 p-1 mr-2">
+                            <button
+                                onClick={() => {
+                                    const newState = !isVoiceEnabled;
+                                    setIsVoiceEnabled(newState);
+                                    if (newState) setShowVoiceInfo(true);
+                                }}
+                                className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${isVoiceEnabled ? 'bg-primary text-black shadow-[0_0_10px_rgba(255,211,0,0.3)]' : 'text-white/50 hover:text-white hover:bg-white/5'}`}
+                            >
+                                {isVoiceEnabled ? <Volume2 size={14} /> : <VolumeX size={14} />}
+                                <span className="hidden sm:inline">{isVoiceEnabled ? 'Voz On' : 'Voz Off'}</span>
+                            </button>
+                            <button onClick={() => setShowVoiceInfo(true)} className="p-1.5 text-white/40 hover:text-white transition-colors">
+                                <Info size={14} />
+                            </button>
+                        </div>
+
+                        <Button variant="ghost" size="icon" onClick={onClose} className="text-white/50 hover:text-white rounded-full">
+                            <X size={20} />
+                        </Button>
+                    </div>
                 </div>
+
+                {/* Voice Improvement Popup Modal */}
+                {showVoiceInfo && (
+                    <div className="absolute inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in" onClick={() => setShowVoiceInfo(false)}>
+                        <div className="bg-[#131b2f] border border-primary/50 shadow-[0_0_30px_rgba(255,211,0,0.15)] rounded-2xl p-6 max-w-sm w-full animate-scale-in relative" onClick={(e) => e.stopPropagation()}>
+                            <button
+                                onClick={() => setShowVoiceInfo(false)}
+                                className="absolute top-4 right-4 text-white/50 hover:text-white bg-white/5 rounded-full p-1"
+                            >
+                                <X size={16} />
+                            </button>
+
+                            <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center mb-4 text-primary">
+                                <Volume2 size={24} />
+                            </div>
+                            <h4 className="text-white font-bold text-lg mb-2">¿Quieres que la IA suene 100% natural?</h4>
+                            <p className="text-white/70 text-sm leading-relaxed mb-4">
+                                Actualmente estás escuchando la voz integrada de tu {typeof navigator !== 'undefined' && navigator.userAgent.includes('Mac') ? 'iPhone/Mac' : 'dispositivo'}. Sigue estos pasos para mejorarla dramáticamente:
+                            </p>
+
+                            <div className="space-y-3 mb-6 bg-black/30 p-4 rounded-xl text-sm border border-white/5">
+                                <div className="flex gap-3">
+                                    <span className="text-primary font-bold">1.</span>
+                                    <span className="text-white/80">Ve a los <strong className="text-white">Ajustes / Configuración</strong> de tu teléfono o PC.</span>
+                                </div>
+                                <div className="flex gap-3">
+                                    <span className="text-primary font-bold">2.</span>
+                                    <span className="text-white/80">Busca <strong className="text-white">Acesibilidad</strong> o <strong>Texto a Voz</strong>.</span>
+                                </div>
+                                <div className="flex gap-3">
+                                    <span className="text-primary font-bold">3.</span>
+                                    <span className="text-white/80">Descarga una voz <strong>Natural</strong> o <strong>Mejorada</strong> en Español.</span>
+                                </div>
+                                <div className="flex gap-3">
+                                    <span className="text-primary font-bold">4.</span>
+                                    <span className="text-white/80">Cierra y vuelve a abrir tu navegador.</span>
+                                </div>
+                            </div>
+
+                            <Button
+                                onClick={() => setShowVoiceInfo(false)}
+                                className="w-full bg-primary text-black hover:bg-primary/90 font-bold"
+                            >
+                                ¡Entendido, continuemos!
+                            </Button>
+                        </div>
+                    </div>
+                )}
 
                 {/* Chat Area */}
                 <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 custom-scrollbar">

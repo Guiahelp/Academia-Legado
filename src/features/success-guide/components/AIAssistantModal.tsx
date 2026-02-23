@@ -112,12 +112,36 @@ export function AIAssistantModal({ isOpen, onClose, stepTitle, stepId }: AIAssis
                     }
                 });
             } else {
-                setChatHistory([
-                    {
-                        role: 'assistant',
-                        content: `¡Excelente verte en esta sección! Llegamos al Paso ${stepId}: "${stepTitle}". ¿Cómo te sientes con esto? ¿Empezamos o tienes alguna pregunta primero?`
+                // Para pasos > 1: Saludo Dinámico con Gemini
+                const generateGreeting = async () => {
+                    setChatHistory([{ role: 'assistant', content: '...' }]); // Indicador de tipeo
+                    try {
+                        const response = await fetch('/api/chat', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                messages: [{
+                                    role: 'user',
+                                    content: `Acabo de entrar al Paso ${stepId}: "${stepTitle}". Salúdame de forma muy breve, amigable y motivadora para empezar este nivel. Recuerda quién eres según tu rol.`
+                                }],
+                                systemPrompt: agentContext?.systemPrompt
+                            })
+                        });
+
+                        if (!response.ok) throw new Error('Error network');
+                        const data = await response.json();
+
+                        setChatHistory([{ role: 'assistant', content: data.text }]);
+                    } catch (error) {
+                        // Fallback empático si falla el AI
+                        setChatHistory([{
+                            role: 'assistant',
+                            content: `¡Excelente verte en esta sección, ${agentContext?.userName || 'futuro empresario'}! Llegamos al Paso ${stepId}: "${stepTitle}". ¿Cómo te sientes con esto? ¿Empezamos o tienes alguna pregunta primero?`
+                        }]);
                     }
-                ]);
+                };
+
+                generateGreeting();
             }
         }
     }, [isOpen, chatHistory.length, stepId, stepTitle, agentContext, agentLoading]);

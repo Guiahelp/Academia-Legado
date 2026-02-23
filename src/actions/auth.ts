@@ -4,6 +4,24 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
+/**
+ * Detecta la URL base correctamente para cada entorno:
+ * - Producción Vercel: usa VERCEL_URL o NEXT_PUBLIC_SITE_URL
+ * - Local: usa NEXT_PUBLIC_SITE_URL (http://localhost:3000)
+ */
+function getBaseUrl(): string {
+  // Prioridad 1: URL de site configurada manualmente (la más confiable)
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL
+  }
+  // Prioridad 2: URL de Vercel automática (en deploys de Vercel)
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`
+  }
+  // Fallback: localhost
+  return 'http://localhost:3000'
+}
+
 export async function login(formData: FormData) {
   const supabase = await createClient()
 
@@ -25,7 +43,7 @@ export async function signInWithGoogle() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback`,
+      redirectTo: `${getBaseUrl()}/api/auth/callback`,
     },
   })
 
@@ -45,7 +63,7 @@ export async function signup(formData: FormData) {
     email: formData.get('email') as string,
     password: formData.get('password') as string,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback`,
+      emailRedirectTo: `${getBaseUrl()}/api/auth/callback`,
     }
   })
 
@@ -69,7 +87,7 @@ export async function resetPassword(formData: FormData) {
   const email = formData.get('email') as string
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/api/auth/callback?next=/update-password`,
+    redirectTo: `${getBaseUrl()}/api/auth/callback?next=/update-password`,
   })
 
   if (error) {

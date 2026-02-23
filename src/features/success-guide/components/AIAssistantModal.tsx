@@ -79,6 +79,11 @@ export function AIAssistantModal({ isOpen, onClose, stepTitle, stepId }: AIAssis
 
     useEffect(() => {
         setMounted(true);
+        return () => {
+            if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+        };
     }, []);
 
     // Initial message based on step
@@ -119,6 +124,29 @@ export function AIAssistantModal({ isOpen, onClose, stepTitle, stepId }: AIAssis
 
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+
+        // --- Integración Web Speech API (Voz Nativa) ---
+        if (chatHistory.length > 0) {
+            const lastMsg = chatHistory[chatHistory.length - 1];
+            if (lastMsg.role === 'assistant' && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const textToSpeak = lastMsg.content.replace(/[*_✅]/g, '').trim();
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                utterance.lang = 'es-ES';
+                utterance.rate = 1.05;
+                utterance.pitch = 0.9; // Tono más grave
+
+                const voices = window.speechSynthesis.getVoices();
+                const esVoices = voices.filter(v => v.lang.startsWith('es'));
+                const bestVoice = esVoices.find(v => v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('pablo')) || esVoices[0];
+                if (bestVoice) {
+                    utterance.voice = bestVoice;
+                }
+
+                // Pequeño delay para que no empiece a hablar antes de que el usuario vea el texto bien
+                setTimeout(() => window.speechSynthesis.speak(utterance), 100);
+            }
+        }
     }, [chatHistory, showForm]);
 
     if (!isOpen || !mounted) return null;

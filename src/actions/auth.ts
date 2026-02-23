@@ -10,15 +10,10 @@ import { createClient } from '@/lib/supabase/server'
  * - Local: usa NEXT_PUBLIC_SITE_URL (http://localhost:3000)
  */
 function getBaseUrl(): string {
-  // Prioridad 1: URL de site configurada manualmente (la más confiable)
-  if (process.env.NEXT_PUBLIC_SITE_URL) {
-    return process.env.NEXT_PUBLIC_SITE_URL
+  // Hardcoded para Vercel para evitar errores de variables de entorno al usuario
+  if (process.env.NODE_ENV === 'production' || process.env.VERCEL) {
+    return 'https://academia-legado-9s65eqhv9-guia-help.vercel.app'
   }
-  // Prioridad 2: URL de Vercel automática (en deploys de Vercel)
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`
-  }
-  // Fallback: localhost
   return 'http://localhost:3000'
 }
 

@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* TRIBU LEGADO - Neon Futuristic Design System */
+
+@layer base {
+  :root {
+    /* Core Background - Absolute Black */
+    --background: 0 0% 2%;
+    --foreground: 0 0% 95%;
+
+    /* Card with Glassmorphism */
+    --card: 240 10% 8%;
+    --card-foreground: 0 0% 95%;
+
+    --popover: 240 10% 8%;
+    --popover-foreground: 0 0% 95%;
+
+    /* Neon Primary - Lila/Fucsia (#D946EF) */
+    --primary: 292 91% 61%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Neon Secondary - Cyan (#00F2FF) */
+    --secondary: 183 100% 50%;
+    --secondary-foreground: 0 0% 5%;
+
+    /* Neon Accent - Green (#39FF14) */
+    --accent: 110 100% 54%;
+    --accent-foreground: 0 0% 5%;
+
+    --muted: 240 10% 15%;
+    --muted-foreground: 0 0% 60%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 10% 20%;
+    --input: 240 10% 15%;
+    --ring: 292 91% 61%;
+
+    --radius: 1rem;
+
+    /* Custom Neon Gradients */
+    --gradient-neon: linear-gradient(135deg, hsl(292 91% 61%), hsl(183 100% 50%));
+    --gradient-neon-vertical: linear-gradient(180deg, hsl(183 100% 50%), hsl(292 91% 61%));
+    --gradient-glow: radial-gradient(ellipse at center, hsl(292 91% 61% / 0.3) 0%, transparent 70%);
+
+    /* Shadows */
+    --shadow-neon-primary: 0 0 20px hsl(292 91% 61% / 0.5), 0 0 40px hsl(292 91% 61% / 0.3);
+    --shadow-neon-accent: 0 0 20px hsl(110 100% 54% / 0.5), 0 0 40px hsl(110 100% 54% / 0.3);
+    --shadow-neon-secondary: 0 0 20px hsl(183 100% 50% / 0.5), 0 0 40px hsl(183 100% 50% / 0.3);
+    --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
+
+  .dark {
+    --background: 0 0% 2%;
+    --foreground: 0 0% 95%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+    background: hsl(var(--background));
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+
+  /* Glassmorphism Card */
+  .glass-card {
+    @apply relative overflow-hidden rounded-2xl;
+    background: linear-gradient(135deg,
+        hsl(240 10% 10% / 0.8) 0%,
+        hsl(240 10% 5% / 0.6) 100%);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid hsl(240 10% 20% / 0.5);
+    box-shadow: var(--shadow-glass);
+  }
+
+  .glass-card-primary {
+    @apply glass-card;
+    border: 1px solid hsl(292 91% 61% / 0.3);
+    box-shadow: var(--shadow-glass), inset 0 0 30px hsl(292 91% 61% / 0.05);
+  }
+
+  .glass-card-secondary {
+    @apply glass-card;
+    border: 1px solid hsl(183 100% 50% / 0.3);
+    box-shadow: var(--shadow-glass), inset 0 0 30px hsl(183 100% 50% / 0.05);
+  }
+
+  /* Neon Text Effects */
+  .text-neon-primary {
+    @apply text-primary;
+    text-shadow: 0 0 10px hsl(292 91% 61% / 0.8), 0 0 20px hsl(292 91% 61% / 0.5);
+  }
+
+  /* Neon Button Styles */
+  .btn-neon-primary {
+    @apply relative px-8 py-4 rounded-xl font-semibold text-primary-foreground transition-all duration-300;
+    background: linear-gradient(135deg, hsl(292 91% 61%) 0%, hsl(292 91% 50%) 100%);
+    box-shadow: var(--shadow-neon-primary);
+  }
+
+  /* Bottom Navigation */
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 z-50 px-4 pb-6 pt-2;
+    background: linear-gradient(0deg, hsl(var(--background)) 0%, hsl(var(--background) / 0.8) 100%);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid hsl(var(--border) / 0.5);
+  }
+
+  .bottom-nav-item {
+    @apply flex flex-col items-center justify-center gap-1 py-1 transition-all duration-300 opacity-60;
+  }
+
+  .bottom-nav-item.active {
+    @apply opacity-100;
+  }
+
+  .bottom-nav-item.active svg {
+    @apply drop-shadow-[0_0_8px_hsl(292_91%_61%)];
+  }
+
+  /* Custom Neon Gradients */
+  .bg-neon-gradient {
+    background: var(--gradient-neon);
+  }
+}

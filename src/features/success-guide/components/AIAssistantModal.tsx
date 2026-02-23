@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Mic, Send, Bot, CheckCircle2, UserPlus } from 'lucide-react';
+import { X, Mic, Send, Bot, CheckCircle2, UserPlus, Volume2, VolumeX, Info } from 'lucide-react';
 import { Button } from '@/shared/components/ui/button';
 import { successGuideService } from '../services/successGuideService';
 import { useAIAgents } from '@/features/agents/hooks/useAIAgents';
@@ -76,6 +76,10 @@ export function AIAssistantModal({ isOpen, onClose, stepTitle, stepId }: AIAssis
     const chatEndRef = useRef<HTMLDivElement>(null);
     const [mounted, setMounted] = useState(false);
     const [showForm, setShowForm] = useState(false);
+
+    // Voice Control States
+    const [isVoiceEnabled, setIsVoiceEnabled] = useState(false);
+    const [showVoiceInfo, setShowVoiceInfo] = useState(false);
 
     useEffect(() => {
         setMounted(true);

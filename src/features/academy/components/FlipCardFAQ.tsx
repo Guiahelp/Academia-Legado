@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { ChevronLeft, ChevronRight, Maximize2, HelpCircle, Sparkles, DollarSign, Calculator, Users, Gem, Layers, Flag, Crown, ArrowUp, Target, PiggyBank, Coins, TrendingUp, RefreshCw, HeartHandshake, Gift, Network, Zap, Link, Percent, Bot, Rocket, Award, Star, Medal, Key, Trophy, Flame, Infinity, Shield, Anchor, Timer, Eye, Brain, Globe, Compass, Wallet } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ChevronLeft, ChevronRight, Maximize2, HelpCircle, Sparkles, DollarSign, Calculator, Users, Gem, Layers, Flag, Crown, ArrowUp, Target, PiggyBank, Coins, TrendingUp, RefreshCw, HeartHandshake, Gift, Network, Zap, Link, Percent, Bot, Rocket, Award, Star, Medal, Key, Trophy, Flame, Infinity, Shield, Anchor, Timer, Eye, Brain, Globe, Compass, Wallet, Loader2 } from "lucide-react";
 import { faqData } from "@/shared/lib/faqData";
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -13,13 +13,69 @@ interface ExpandModalProps {
 }
 
 const ExpandModal = ({ question, answer, color, isOpen, onClose }: ExpandModalProps) => {
+    const [expandedAnswer, setExpandedAnswer] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+
+    useEffect(() => {
+        if (!isOpen) {
+            setExpandedAnswer(null);
+            setIsLoading(false);
+            return;
+        }
+
+        const fetchExpandedAnswer = async () => {
+            setIsLoading(true);
+            try {
+                const systemPrompt = `Eres Albert Einstein, el Estratega de Marketing e IA de Tribu Legado. Tu tarea es expandir una respuesta breve de Preguntas Frecuentes de la Academia. Sé hiperdidáctico, usa analogías fascinantes y mucha energía. No te extiendas más de 2 párrafos. Mantén el misterio y el profesionalismo.`;
+                const promptMsg = `Expande esta pregunta frecuente detalladamente para un nuevo integrante:\nPregunta: ${question}\nRespuesta Breve a expandir: ${answer}`;
+
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        messages: [{ role: 'user', content: promptMsg }],
+                        systemPrompt: systemPrompt
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    setExpandedAnswer(data.text);
+                } else {
+                    setExpandedAnswer(answer);
+                }
+            } catch (err) {
+                setExpandedAnswer(answer);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchExpandedAnswer();
+    }, [isOpen, question, answer]);
+
     if (!isOpen) return null;
     return (
         <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-fade-in" onClick={onClose}>
-            <div className="w-full max-w-lg rounded-2xl p-6 animate-scale-in border-2" onClick={(e) => e.stopPropagation()} style={{ background: 'linear-gradient(135deg, hsl(240 10% 8%) 0%, hsl(220 15% 5%) 100%)', borderColor: `hsl(${color} / 0.6)`, boxShadow: `0 0 40px hsl(${color} / 0.3)` }}>
-                <h3 className="text-lg font-bold mb-4 leading-tight" style={{ color: `hsl(${color})` }}>{question}</h3>
-                <p className="text-foreground leading-relaxed text-base">{answer}</p>
-                <button onClick={onClose} className="mt-6 w-full py-3 rounded-xl font-bold transition-all hover:scale-[1.02]" style={{ background: `linear-gradient(135deg, hsl(${color} / 0.2), hsl(${color} / 0.1))`, border: `1px solid hsl(${color} / 0.5)`, color: `hsl(${color})` }}>Cerrar</button>
+            <div className="w-full max-w-lg rounded-2xl p-6 animate-scale-in border-2 relative" onClick={(e) => e.stopPropagation()} style={{ background: 'linear-gradient(135deg, hsl(240 10% 8%) 0%, hsl(220 15% 5%) 100%)', borderColor: `hsl(${color} / 0.6)`, boxShadow: `0 0 40px hsl(${color} / 0.3)` }}>
+                {isLoading && (
+                    <div className="absolute top-4 right-4 animate-pulse pt-1">
+                        <Loader2 size={24} className="animate-spin" style={{ color: `hsl(${color})` }} />
+                    </div>
+                )}
+                <h3 className="text-lg font-bold mb-4 leading-tight pr-6" style={{ color: `hsl(${color})` }}>{question}</h3>
+                <div className="min-h-[100px] flex items-center">
+                    {isLoading ? (
+                        <p className="text-foreground/50 leading-relaxed text-sm animate-pulse italic flex items-center gap-2">
+                            Aguarde. El Agente Albert está procesando e integrando la respuesta en tiempo real...
+                        </p>
+                    ) : (
+                        <div className="text-foreground leading-relaxed text-sm space-y-3 whitespace-pre-wrap animate-fade-in">
+                            {expandedAnswer}
+                        </div>
+                    )}
+                </div>
+                <button onClick={onClose} className="mt-8 w-full py-3 rounded-xl font-bold transition-all hover:scale-[1.02]" style={{ background: `linear-gradient(135deg, hsl(${color} / 0.2), hsl(${color} / 0.1))`, border: `1px solid hsl(${color} / 0.5)`, color: `hsl(${color})` }}>Entendido</button>
             </div>
         </div>
     );

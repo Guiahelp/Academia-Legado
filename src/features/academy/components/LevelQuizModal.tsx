@@ -142,8 +142,8 @@ export function LevelQuizModal({ isOpen, levelNumber, levelTitle, onClose, onSuc
     }
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300">
-            <div className="w-full max-w-md max-h-[90vh] bg-[#0a0f1c] rounded-3xl border border-secondary/30 shadow-[0_0_40px_rgba(41,232,255,0.15)] relative flex flex-col overflow-hidden">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-300">
+            <div className="w-full max-w-md max-h-[85dvh] bg-[#0a0f1c] rounded-3xl border border-secondary/30 shadow-[0_0_40px_rgba(41,232,255,0.15)] relative flex flex-col overflow-hidden mt-4 mb-16 md:mb-0">
 
                 {/* Cabecera */}
                 <div className="p-6 border-b border-white/10 relative overflow-hidden">

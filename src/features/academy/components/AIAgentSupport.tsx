@@ -13,19 +13,19 @@ export function AIAgentSupport({ agent, onContact }: Props) {
 
     const agentData = {
         Nikola: {
-            role: "Estratega de Marketing e IA",
+            role: "Maestro de Tecnología y Redes",
             color: "text-secondary",
             borderColor: "border-secondary/30",
             glow: "shadow-[0_0_15px_rgba(0,242,255,0.3)]",
-            description: "Especialista en creación de contenido y automatización de red.",
+            description: "Experto en Smart Contracts, duplicación y operativa técnica.",
             telegram: "https://t.me/nikolalegadobot"
         },
         Albert: {
-            role: "Maestro de Tecnología y Redes",
+            role: "Estratega de Marketing e IA",
             color: "text-primary",
             borderColor: "border-primary/30",
             glow: "shadow-[0_0_15px_rgba(217,70,239,0.3)]",
-            description: "Experto en Smart Contracts, duplicación y operativa técnica.",
+            description: "Especialista en creación de contenido y automatización de red.",
             telegram: "https://t.me/albertlegadobot"
         }
     };

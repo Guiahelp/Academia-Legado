@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Volume2, VolumeX, X, Sparkles, Shield, Cpu, Link, Wallet, Globe, Bot, Scale, Rocket, Brain, Users, Target, TrendingUp, Zap, Lock, Lightbulb, DollarSign, Key, Eye, Network, Mic, Loader2, Clock } from "lucide-react";
+import { Play, Pause, X, Sparkles, Shield, Cpu, Link, Wallet, Globe, Bot, Scale, Rocket, Brain, Users, Target, TrendingUp, Zap, Lock, Lightbulb, DollarSign, Key, Eye, Network, Mic, Loader2, Clock } from "lucide-react";
 import LevelCard from "@/features/academy/components/LevelCard";
 import VideoPopup from "@/features/academy/components/VideoPopup";
 import FlipCardFAQ from "@/features/academy/components/FlipCardFAQ";
@@ -15,6 +15,7 @@ import { useAcademyProgress } from "@/features/academy/hooks/useAcademyProgress"
 import { useAuth } from "@/features/auth/contexts/AuthContext";
 
 const ORACULO_AUDIO = "https://jnvpzjjgcdclcwgjgkpk.supabase.co/storage/v1/object/public/assets/voz-oraculo.MP3";
+const ALBERT_IMAGE = "https://iughqygysiictpqvcgxq.supabase.co/storage/v1/object/public/assets/Tribu/albert.webp";
 
 interface VideoItem {
     id: string; title: string; subtitle?: string; duration: string; icon: React.ReactNode; videoId?: string; comingSoon?: boolean;
@@ -75,7 +76,7 @@ export default function AcademiaPage() {
     }, [hasAccess]);
 
     const [showOraculo, setShowOraculo] = useState(true);
-    const [isMuted, setIsMuted] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(false);
     const audioRef = useRef<HTMLAudioElement>(null);
 
     const [completedVideos, setCompletedVideos] = useState<Set<string>>(new Set());
@@ -97,14 +98,25 @@ export default function AcademiaPage() {
     }, [completedVideos]);
 
     useEffect(() => {
-        if (audioRef.current) audioRef.current.muted = isMuted;
-    }, [isMuted]);
-
-    useEffect(() => {
         if (showOraculo && audioRef.current && (hasAccess || localAccess || status === 'guest' || isPending)) {
-            audioRef.current.play().catch(() => { });
+            // Intentar autoplay, si falla el usuario usará el botón Play
+            audioRef.current.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
+
+            audioRef.current.onended = () => setIsPlaying(false);
         }
     }, [showOraculo, hasAccess, localAccess, status, isPending]);
+
+    const togglePlay = () => {
+        if (audioRef.current) {
+            if (isPlaying) {
+                audioRef.current.pause();
+                setIsPlaying(false);
+            } else {
+                audioRef.current.play();
+                setIsPlaying(true);
+            }
+        }
+    };
 
     const handleVideoComplete = (videoId: string) => setCompletedVideos(prev => new Set([...prev, videoId]));
 
@@ -161,15 +173,15 @@ export default function AcademiaPage() {
                     <audio ref={audioRef} src={ORACULO_AUDIO} />
                     <div className="flex flex-col gap-4">
                         <div className="flex items-start gap-4">
-                            <div className="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0 animate-pulse border border-secondary/50">
-                                <span className="text-3xl">🔮</span>
+                            <div className="w-14 h-14 rounded-full bg-black flex items-center justify-center flex-shrink-0 border-2 border-primary/50 overflow-hidden relative shadow-[0_0_15px_rgba(217,70,239,0.3)]">
+                                <img src={ALBERT_IMAGE} alt="Albert" className="w-full h-full object-cover opacity-90" />
                             </div>
                             <div className="flex-1">
                                 <div className="flex items-center justify-between mb-2">
-                                    <h3 className="font-bold text-secondary text-lg uppercase tracking-wider">El Oráculo</h3>
+                                    <h3 className="font-bold text-primary text-lg uppercase tracking-wider">El Oráculo (Albert)</h3>
                                     <div className="flex items-center gap-2">
-                                        <button onClick={() => setIsMuted(!isMuted)} className={`p-2 rounded-full transition-colors ${isMuted ? 'bg-destructive/50' : 'bg-secondary/20 hover:bg-secondary/30'}`}>
-                                            {isMuted ? <VolumeX size={16} className="text-white" /> : <Volume2 size={16} className="text-secondary" />}
+                                        <button onClick={togglePlay} className={`p-2 rounded-full transition-colors ${isPlaying ? 'bg-primary/20 hover:bg-primary/30' : 'bg-primary/20 hover:bg-primary/30'} flex items-center gap-2 text-xs font-bold uppercase`}>
+                                            {isPlaying ? <><Pause size={16} className="text-primary" /> <span className="text-primary hidden sm:inline">Pausar</span></> : <><Play size={16} className="text-primary" /> <span className="text-primary hidden sm:inline">Escuchar</span></>}
                                         </button>
                                         <button onClick={() => setShowOraculo(false)} className="p-2 rounded-full hover:bg-white/10 transition-colors">
                                             <X size={16} />
@@ -179,10 +191,10 @@ export default function AcademiaPage() {
                             </div>
                         </div>
                         <div className="text-sm text-muted-foreground leading-relaxed max-h-48 overflow-y-auto pr-2 scrollbar-hide space-y-3">
-                            <p>Bienvenido a la Academia Legado. Soy El Oráculo.</p>
+                            <p>Bienvenido a la Academia Legado. Soy Albert, tu Oráculo.</p>
                             <p>Frente a ti tienes el mapa maestro. Hemos condensado todo el poder del sistema Tribu y la blockchain en esta biblioteca de videos y guías.</p>
                             <p>Tu primera misión es absorber este conocimiento. Las respuestas que buscas para recibir tus beneficios ya están grabadas aquí abajo.</p>
-                            <p className="text-secondary font-bold">El futuro ya está aquí. Empieza por el primer video.</p>
+                            <p className="text-primary font-bold">El futuro ya está aquí. Empieza por el primer video.</p>
                         </div>
                     </div>
                 </div>

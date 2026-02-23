@@ -96,8 +96,8 @@ export function AIAssistantModal({ isOpen, onClose, stepTitle, stepId }: AIAssis
                     if (data && data.meta_financiera) {
                         setStep1State(3);
                         const memoryGreetings = agentContext?.metaFinanciera
-                            ? `¡Qué hay ${agentContext.userName}! Seguimos firmes por esos ${agentContext.metaFinanciera} que me prometiste. Tienes tu contrato psicológico activo. ¡Continuemos!`
-                            : 'Entendido. Tu contrato está intacto. Sigamos avanzando.';
+                            ? `¡Qué gusto saludarte de nuevo ${agentContext.userName}! Aún tengo súper presente esa meta de ${agentContext.metaFinanciera} que me compartiste. Tu Acuerdo de Éxito sigue activo, ¡así que continuemos hacia adelante!`
+                            : '¡Hola! Qué bueno tenerte acá devuelta. Sigamos avanzando con todo.';
                         setChatHistory([{
                             role: 'assistant',
                             content: memoryGreetings
@@ -105,8 +105,8 @@ export function AIAssistantModal({ isOpen, onClose, stepTitle, stepId }: AIAssis
                     } else {
                         setChatHistory([{
                             role: 'assistant',
-                            content: `Aquí estamos${agentContext?.userName ? ` ${agentContext.userName}` : ''}. Antes de ponernos a hacer dinero o invitar gente, necesitamos firmar nuestro "Contrato Psicológico". No damos un paso más sin esto claro.
-\nPrimero y al grano: **¿Qué quieres lograr económicamente?** (Ej: "$1,000 USD extra al mes")`
+                            content: `¡Hola${agentContext?.userName ? ` ${agentContext.userName}` : ''}! Qué alegría que estés por aquí. Antes de ponernos manos a la obra con todo este mundo digital, me encantaría conocerte un poquito mejor. Así podré guiarte de forma más precisa.
+\nCuéntame con confianza: **¿Qué objetivo económico principal te gustaría alcanzar con este proyecto?** (Ej: "$1,000 USD extra para estar más tranquilo a fin de mes")`
                         }]);
                         setStep1State(0);
                     }
@@ -115,7 +115,7 @@ export function AIAssistantModal({ isOpen, onClose, stepTitle, stepId }: AIAssis
                 setChatHistory([
                     {
                         role: 'assistant',
-                        content: `Entrando a la jugada. Paso ${stepId}: "${stepTitle}". ¿Le damos o tienes alguna duda antes de arrancar con esto?`
+                        content: `¡Excelente verte en esta sección! Llegamos al Paso ${stepId}: "${stepTitle}". ¿Cómo te sientes con esto? ¿Empezamos o tienes alguna pregunta primero?`
                     }
                 ]);
             }
@@ -167,7 +167,7 @@ export function AIAssistantModal({ isOpen, onClose, stepTitle, stepId }: AIAssis
             const hasNumbers = /\d/.test(userMsg);
             if (!hasNumbers) {
                 setTimeout(() => {
-                    setChatHistory(h => [...h, { role: 'assistant', content: 'Nikola no entiende de abstracciones sin cifras. Háblame de números. Vuelve a intentar: ¿Cuánto dinero exactamente buscas ganar?' }]);
+                    setChatHistory(h => [...h, { role: 'assistant', content: 'Me encantan esos sueños, pero ayúdame a aterrizarlos en una cifra concreta para poder hacer un plan juntos. ¿De cuánto dinero estaríamos hablando?' }]);
                 }, 600);
                 return;
             }
@@ -175,13 +175,13 @@ export function AIAssistantModal({ isOpen, onClose, stepTitle, stepId }: AIAssis
             setIntentionData(prev => ({ ...prev, meta_financiera: userMsg }));
             setStep1State(1);
             setTimeout(() => {
-                setChatHistory(h => [...h, { role: 'assistant', content: 'Va. Segundo punto crítico:\n\n**¿Cuánto tiempo REAL tienes a la semana para dedicarle a este negocio?**' }]);
+                setChatHistory(h => [...h, { role: 'assistant', content: '¡Me encanta! Vamos a trabajar duro por ello.\n\nAhora, siendo súper realistas con tu día a día: **¿Cuántas horas a la semana crees que podrías dedicarle a esto con buen nivel de enfoque?**' }]);
             }, 600);
         } else if (step1State === 1) {
             const hasTimeReference = /(\d|hora|hr|dia|día|minuto|semana|mes)/i.test(userMsg);
             if (!hasTimeReference) {
                 setTimeout(() => {
-                    setChatHistory(h => [...h, { role: 'assistant', content: 'Necesito que seas específico. ¿Cuántas **horas** a la semana vas a dedicarle?' }]);
+                    setChatHistory(h => [...h, { role: 'assistant', content: 'Entendido, pero para medir el progreso, ¿podrías darme un aproximado en horas, días o minutos? Solo para tener una mejor ideal de tu disponibilidad.' }]);
                 }, 600);
                 return;
             }
@@ -189,12 +189,12 @@ export function AIAssistantModal({ isOpen, onClose, stepTitle, stepId }: AIAssis
             setIntentionData(prev => ({ ...prev, compromiso_tiempo: userMsg }));
             setStep1State(2);
             setTimeout(() => {
-                setChatHistory(h => [...h, { role: 'assistant', content: 'Anotado. El último filtro:\n\n**¿A qué estás dispuesto a renunciar para lograr esa meta?** (Ej: Netflix, fiestas, dormir tarde).' }]);
+                setChatHistory(h => [...h, { role: 'assistant', content: 'Anotado. El tiempo es valioso.\n\nComo último detalle: sé que todos estamos ocupados, lograr resultados implica hacer espacio. **¿Qué actividad cotidiana (como ver series, jugar, salir un poco menos) estarías dispuesto a reducir temporalmente para enfocarte en tu meta?**' }]);
             }, 600);
         } else if (step1State === 2) {
             if (userMsg.trim().length < 5) {
                 setTimeout(() => {
-                    setChatHistory(h => [...h, { role: 'assistant', content: 'Ese sacrificio suena demasiado fácil. Detalla un poco más: ¿Qué hábito vas a eliminar?' }]);
+                    setChatHistory(h => [...h, { role: 'assistant', content: '¡Seguro puedes ser un poco más específico! Cuéntame exactamente qué pequeño hábito diario o entretenimiento vas a posponer un ratito.' }]);
                 }, 600);
                 return;
             }
@@ -204,7 +204,7 @@ export function AIAssistantModal({ isOpen, onClose, stepTitle, stepId }: AIAssis
             setStep1State(3);
 
             setTimeout(() => {
-                setChatHistory(h => [...h, { role: 'assistant', content: 'Sellanado el contrato en la base de datos...' }]);
+                setChatHistory(h => [...h, { role: 'assistant', content: 'Registrando tus increíbles metas e intenciones en tu perfil...' }]);
             }, 500);
 
             const saveIntention = async () => {
@@ -212,10 +212,10 @@ export function AIAssistantModal({ isOpen, onClose, stepTitle, stepId }: AIAssis
                     await new Promise(r => setTimeout(r, 1500));
                     await successGuideService.saveIntention(finalData);
                     setStep1State(4);
-                    setChatHistory(h => [...h, { role: 'system', content: '✅ Contrato Psicológico Sellado' }, { role: 'assistant', content: 'Excelente. Ya estás en el sistema. Recuerda: si no pones el tiempo ni el sacrificio, yo mismo te lo voy a recordar. Tienes luz verde para el Paso 2.' }]);
+                    setChatHistory(h => [...h, { role: 'system', content: '✅ Acuerdo de Éxito Establecido' }, { role: 'assistant', content: '¡Listo! Me ha encantado escucharte. Ahora que conocemos tus metas de fondo, trabajaremos 100% enfocados en ellas. Tienes luz verde para avanzar al Paso 2 con total confianza.' }]);
                 } catch (error) {
                     setStep1State(4);
-                    setChatHistory(h => [...h, { role: 'assistant', content: 'Hecho. Contrato registrado. Dale al Paso 2, hermano.' }]);
+                    setChatHistory(h => [...h, { role: 'assistant', content: 'Hecho. Todo registrado. ¡Es un súper buen primer paso! Vamos por el Paso 2.' }]);
                 }
             };
 
@@ -240,10 +240,37 @@ export function AIAssistantModal({ isOpen, onClose, stepTitle, stepId }: AIAssis
                 setShowForm(true);
             }
 
-            setTimeout(() => {
-                const response = getDynamicResponse(userMsg);
-                setChatHistory(h => [...h, { role: 'assistant', content: response }]);
-            }, 800);
+            // Llamada dinámica a AI real
+            setChatHistory(h => [...h, { role: 'assistant', content: '...' }]); // Estado "Escribiendo" temporal
+            setTimeout(async () => {
+                try {
+                    const response = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            messages: newHistory,
+                            systemPrompt: agentContext?.systemPrompt
+                        })
+                    });
+
+                    if (!response.ok) throw new Error('Error network');
+                    const data = await response.json();
+
+                    setChatHistory(h => {
+                        const copy = [...h];
+                        copy[copy.length - 1] = { role: 'assistant', content: data.text };
+                        return copy;
+                    });
+                } catch (error) {
+                    // Fallback a las respuestas estáticas en caso de que falte la API Key o falle internet
+                    const response = getDynamicResponse(userMsg);
+                    setChatHistory(h => {
+                        const copy = [...h];
+                        copy[copy.length - 1] = { role: 'assistant', content: response };
+                        return copy;
+                    });
+                }
+            }, 300);
         }
     };
 

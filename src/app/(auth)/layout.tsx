@@ -11,10 +11,12 @@ export default function AuthLayout({
         <div className="relative z-10 flex flex-col justify-center px-12 xl:px-20">
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-white/10 backdrop-blur flex items-center justify-center">
-                <svg className="w-7 h-7 text-secondary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
-                </svg>
+              <div className="w-12 h-12 rounded-xl bg-black/50 backdrop-blur flex items-center justify-center border border-white/10 overflow-hidden p-1.5">
+                <img
+                  src="https://iughqygysiictpqvcgxq.supabase.co/storage/v1/object/public/assets/Tribu/logo-tribu-legado.webp"
+                  alt="Logo Tribu Legado"
+                  className="w-full h-full object-contain"
+                />
               </div>
               <span className="text-2xl font-bold text-white">Tribu Legado</span>
             </div>

@@ -126,7 +126,7 @@ const HamburgerMenu = () => {
                         </button>
                     ) : (
                         <button
-                            onClick={() => handleNavigate('/auth')}
+                            onClick={() => handleNavigate('/login')}
                             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-medium bg-primary text-black hover:bg-primary/90 transition-all"
                         >
                             <LogIn size={18} />

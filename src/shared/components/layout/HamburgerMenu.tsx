@@ -25,11 +25,13 @@ const HamburgerMenu = () => {
         { path: '/academia', label: 'Academia', icon: GraduationCap },
         { path: '/mi-equipo', label: 'Mi Equipo', icon: Users, requireAuth: true },
         { path: '/mi-cuenta', label: 'Mi Cuenta', icon: User, requireAuth: true },
+        { path: '/admin', label: 'Panel Admin', icon: Shield, requireAuth: true, requireAdmin: true },
         { path: '/contacto', label: 'Contacto', icon: MessageCircle },
     ];
 
     const visibleItems = navItems.filter(item => {
         if (item.requireAuth && !user) return false;
+        if (item.requireAdmin && !isAdmin) return false;
         return true;
     });
 

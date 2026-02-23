@@ -52,7 +52,7 @@ export default function SuccessGuideLayout() {
     const [selectedStep, setSelectedStep] = useState<{ id: number, titulo: string } | null>(null)
     const [showLockedModal, setShowLockedModal] = useState(false)
     const [isZenMode, setIsZenMode] = useState(false)
-    const isLocked = false; // TEMPORALMENTE DESBLOQUEADO: isPending || status === 'guest'
+    const isLocked = isPending || status === 'guest';
 
     const handleSaveHabit = async (habitData: any) => {
         if (isLocked) return;

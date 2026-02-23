@@ -121,11 +121,14 @@ export default function AcademiaPage() {
     const handleVideoComplete = (videoId: string) => setCompletedVideos(prev => new Set([...prev, videoId]));
 
     const handleCompleteLevel = async (levelNumber: number) => {
-        // TEMPORALMENTE DESBLOQUEADO
-        // if (levelNumber === 0 && !hasAccess) {
-        //     setShowPremiumModal(true);
-        //     return;
-        // }
+        if (isPending || status === 'guest') {
+            setShowPremiumModal(true);
+            return;
+        }
+        if (levelNumber === 0 && !hasAccess) {
+            setShowPremiumModal(true);
+            return;
+        }
         await unlockNextLevel(levelNumber);
         setShowConfetti(true);
     };
@@ -142,7 +145,10 @@ export default function AcademiaPage() {
         }
     };
 
-    const _isLevelUnlockedFinal = (levelNumber: number) => true; // TEMPORALMENTE DESBLOQUEADO: levelNumber === 0 || ((hasAccess || localAccess) && isLevelUnlocked(levelNumber));
+    const _isLevelUnlockedFinal = (levelNumber: number) => {
+        if (isPending || status === 'guest') return false;
+        return levelNumber === 0 || ((hasAccess || localAccess) && isLevelUnlocked(levelNumber));
+    };
 
     if (isAccessLoading || loadingProgress) return (
         <div className="min-h-[calc(100vh-80px)] flex flex-col items-center justify-center">
@@ -207,7 +213,6 @@ export default function AcademiaPage() {
                 <p className="text-muted-foreground text-sm uppercase tracking-widest font-medium">4 Niveles • Progresión Desbloqueada</p>
             </div>
 
-            {/* TEMPORALMENTE OCULTO PARA PRUEBAS
             {!(hasAccess || localAccess) && (
                 <div className="flex justify-center mb-8">
                     <button onClick={handleLockedClick} className="flex items-center gap-2 px-6 py-3 rounded-full text-sm font-bold transition-all hover:scale-105 animate-pulse" style={{ background: 'linear-gradient(135deg, hsl(45 100% 50% / 0.1), hsl(35 100% 45% / 0.05))', border: '1px solid hsl(45 100% 50% / 0.5)', color: 'hsl(45 100% 50%)', boxShadow: '0 0 20px hsl(45 100% 50% / 0.2)' }}>
@@ -215,7 +220,6 @@ export default function AcademiaPage() {
                     </button>
                 </div>
             )}
-            */}
 
             <div className="space-y-2">
                 {levels.map((level) => (

@@ -44,8 +44,8 @@ export async function updateSession(request: NextRequest) {
         pathname.startsWith('/update-password') ||
         pathname.startsWith('/check-email')
 
-    const protectedPaths = ['/admin', '/agentes', '/contacto', '/cuenta', '/equipo']
-    const isProtectedRoute = protectedPaths.some(path => pathname.startsWith(path)) || pathname === '/'
+    const protectedPaths = ['/admin', '/cuenta', '/equipo', '/espera-aprobacion']
+    const isProtectedRoute = protectedPaths.some(path => pathname.startsWith(path))
 
     if (!user && isProtectedRoute) {
         // missing session -> redirect to login

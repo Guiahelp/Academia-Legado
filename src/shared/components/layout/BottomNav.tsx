@@ -1,12 +1,12 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { Home, Play, Map, GraduationCap, MessageCircle } from "lucide-react";
+import { Home, Bot, Map, GraduationCap, MessageCircle } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
 const navItems = [
     { path: "/", label: "Inicio", icon: Home },
-    { path: "/agentes", label: "Agentes", icon: Play },
+    { path: "/agentes", label: "Agentes", icon: Bot },
     { path: "/guia", label: "Guía", icon: Map },
     { path: "/academia", label: "Academia", icon: GraduationCap },
     { path: "/contacto", label: "Contacto", icon: MessageCircle },

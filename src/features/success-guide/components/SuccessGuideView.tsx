@@ -1,243 +1,422 @@
 'use client'
 
 import { useState } from 'react'
-import { useProspects, useGoals, useDailyHabit } from '../hooks/useSuccessGuide'
-import { ProspectList } from './ProspectList'
-import { GoalTracker } from './GoalTracker'
-import { DailyChecklist } from './DailyChecklist'
-import { successGuideService } from '../services/successGuideService'
-import { Target, TrendingUp, Brain, Rocket, Shield, Sparkles, Bot, Users, Zap, CheckCircle2, Lock, X } from "lucide-react";
-import { AIAssistantModal } from './AIAssistantModal'
-import Link from 'next/link'
-import { Button } from '@/shared/components/ui/button'
 import { useAuth } from '@/features/auth/contexts/AuthContext'
-import { OneClickShare } from '@/shared/components/layout/OneClickShare'
-import { GraduationCap, MessageSquare } from 'lucide-react'
+import { login, signInWithGoogle, signup } from '@/actions/auth'
+import { 
+  Target, Brain, Zap, Users, Bot, Rocket, TrendingUp, Shield, Sparkles, 
+  Home, ChevronRight, Map, GraduationCap, MessageSquare, Trophy,
+  X, Mail, Lock, Volume2, AlertTriangle, ChevronDown, ChevronUp,
+  Star, Flame, Award, Dumbbell, CheckCircle2
+} from 'lucide-react'
 
+// ─── Tipos ──────────────────────────────────────────────────────────────────
+type AuthMode = 'login' | 'signup'
+
+// ─── Datos de contenido (espejados del original) ─────────────────────────────
 const FASES = [
-    {
-        nombre: "Fase 1: Fundamentos",
-        pasos: [
-            { id: 1, titulo: "Declaración de Intención", icon: <Target className="text-primary" size={24} /> },
-            { id: 2, titulo: "Tu 'Por Qué'", icon: <Brain className="text-primary" size={24} /> },
-            { id: 3, titulo: "El Vehículo", icon: <Zap className="text-primary" size={24} /> },
-        ]
-    },
-    {
-        nombre: "Fase 2: Crecimiento",
-        pasos: [
-            { id: 4, titulo: "Lista Inteligente CRM", icon: <Users className="text-secondary" size={24} /> },
-            { id: 5, titulo: "Contenido que Conecta", icon: <Bot className="text-secondary" size={24} /> },
-            { id: 6, titulo: "Sistema de Invitación", icon: <Rocket className="text-secondary" size={24} /> },
-        ]
-    },
-    {
-        nombre: "Fase 3: Expansión",
-        pasos: [
-            { id: 7, titulo: "Seguimiento Automatizado", icon: <TrendingUp className="text-accent" size={24} /> },
-            { id: 8, titulo: "Cierre y Bienvenida", icon: <Shield className="text-accent" size={24} /> },
-            { id: 9, titulo: "Ciclo de Mejora", icon: <Sparkles className="text-accent" size={24} /> },
-        ]
+  {
+    numero: 1,
+    nombre: 'FASE 1: FUNDAMENTOS',
+    color: '#A855F7',
+    pasos: [
+      { id: 1, titulo: 'Declaración de Intención', xp: '+25 XP', emoji: '🎯', desc: 'Define tu compromiso con el sistema de economía colaborativa.' },
+      { id: 2, titulo: "Tu 'Por Qué'", xp: '+35 XP', emoji: '🧠', desc: 'Conecta con tu motivación profunda para construir tu red.' },
+      { id: 3, titulo: 'El Vehículo', xp: '+40 XP', emoji: '⚡', desc: 'Entiende el mecanismo del Smart Contract y su poder.' },
+    ],
+  },
+  {
+    numero: 2,
+    nombre: 'FASE 2: CRECIMIENTO',
+    color: '#EC4899',
+    pasos: [
+      { id: 4, titulo: 'Lista Inteligente CRM', xp: '+50 XP', emoji: '👥', desc: 'Organiza tus prospectos con inteligencia artificial.' },
+      { id: 5, titulo: 'Contenido que Conecta', xp: '+55 XP', emoji: '📲', desc: 'Crea mensajes que abren conversaciones sin presión.' },
+      { id: 6, titulo: 'Sistema de Invitación', xp: '+60 XP', emoji: '🚀', desc: 'Proceso paso a paso para duplicar tu equipo eficientemente.' },
+    ],
+  },
+  {
+    numero: 3,
+    nombre: 'FASE 3: EXPANSIÓN',
+    color: '#06B6D4',
+    pasos: [
+      { id: 7, titulo: 'Seguimiento Automatizado', xp: '+65 XP', emoji: '📈', desc: 'Usa la IA para hacer seguimiento sin perder ningún prospecto.' },
+      { id: 8, titulo: 'Cierre y Bienvenida', xp: '+70 XP', emoji: '🛡️', desc: 'El arte de cerrar con elegancia y onboarding impecable.' },
+      { id: 9, titulo: 'Ciclo de Mejora', xp: '+80 XP', emoji: '✨', desc: 'Sistema de mejora continua para escalar a Diamante.' },
+    ],
+  },
+]
+
+const LOGROS = [
+  { emoji: '⚡', titulo: 'Primera Tarea', desbloqueado: true, color: '#CCFF00' },
+  { emoji: '🔥', titulo: 'En Racha', desbloqueado: true, color: '#F97316' },
+  { emoji: '🏅', titulo: 'Fase 1 Completa', desbloqueado: false, color: '#6B7280' },
+  { emoji: '💪', titulo: 'Imparable', desbloqueado: true, color: '#CCFF00' },
+  { emoji: '🤖', titulo: 'Fase 2 Completa', desbloqueado: false, color: '#6B7280' },
+  { emoji: '🏆', titulo: 'Máquina', desbloqueado: false, color: '#6B7280' },
+  { emoji: '🥈', titulo: 'Fase 3 Completa', desbloqueado: false, color: '#6B7280' },
+  { emoji: '💎', titulo: 'Leyenda Legado', desbloqueado: false, color: '#6B7280' },
+]
+
+// ─── Modal de Login ──────────────────────────────────────────────────────────
+function LoginModal({ onClose }: { onClose: () => void }) {
+  const [mode, setMode] = useState<AuthMode>('login')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    const form = e.currentTarget
+    const formData = new FormData(form)
+
+    const result = mode === 'login' 
+      ? await login(formData)
+      : await signup(formData)
+
+    if (result?.error) {
+      setError(result.error)
+      setLoading(false)
     }
-];
+  }
 
-export default function SuccessGuideLayout() {
-    const { isPending, status } = useAuth()
-    const { prospects, loading: loadingProspects, refetch: refetchProspects } = useProspects()
-    const { goals, loading: loadingGoals, refetch: refetchGoals } = useGoals()
-    const today = new Date().toISOString().split('T')[0]
-    const { habit, loading: loadingHabit, refetch: refetchHabit } = useDailyHabit(today)
+  async function handleGoogle() {
+    setLoading(true)
+    await signInWithGoogle()
+    setLoading(false)
+  }
 
-    // State for AI Modal
-    const [selectedStep, setSelectedStep] = useState<{ id: number, titulo: string } | null>(null)
-    const [showLockedModal, setShowLockedModal] = useState(false)
-    const [isZenMode, setIsZenMode] = useState(false)
-    const isLocked = isPending || status === 'guest';
+  return (
+    <div className="fixed inset-0 z-[200] bg-black/90 backdrop-blur-sm flex flex-col items-center justify-start pt-4 animate-fade-in overflow-y-auto" onClick={(e) => e.target === e.currentTarget && onClose()}>
+      {/* Barra superior con Volver */}
+      <div className="w-full max-w-md px-4 flex items-center gap-3 mb-4">
+        <button onClick={onClose} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-sm">
+          <ChevronRight className="rotate-180 w-4 h-4" /> Volver
+        </button>
+      </div>
 
-    const handleSaveHabit = async (habitData: any) => {
-        if (isLocked) return;
-        try {
-            await successGuideService.upsertDailyHabit({
-                ...habitData,
-                date: today
-            })
-            refetchHabit()
-        } catch (error) {
-            console.error('Error saving habit:', error)
-        }
-    }
+      {/* Card del formulario */}
+      <div className="w-full max-w-md px-4">
+        <div className="bg-[#111111] border border-white/10 rounded-2xl p-8 shadow-2xl">
+          {/* Logo TL */}
+          <div className="flex flex-col items-center mb-8">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-600 flex items-center justify-center mb-4 shadow-[0_0_30px_rgba(168,85,247,0.3)]">
+              <span className="text-white font-black text-2xl tracking-tight">TL</span>
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-1">
+              {mode === 'login' ? 'Bienvenido de vuelta' : 'Crear tu cuenta'}
+            </h2>
+            <p className="text-zinc-400 text-sm">
+              {mode === 'login' ? 'Accede a tu cuenta' : 'Únete a la Tribu Legado'}
+            </p>
+          </div>
 
-    return (
-        <div className={`space-y-8 pb-20 md:pb-0 relative`}>
-            {showLockedModal && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-                    <div className="glass-card p-8 rounded-3xl max-w-sm w-full relative border-primary/30 text-center animate-scale-in">
-                        <button onClick={() => setShowLockedModal(false)} className="absolute top-4 right-4 text-muted-foreground hover:text-white">
-                            <X size={20} />
-                        </button>
-                        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto border border-primary/20 mb-4">
-                            <Lock className="text-primary" size={32} />
-                        </div>
-                        <h3 className="text-xl font-bold text-white uppercase italic mb-2">Acceso <span className="text-primary">Restringido</span></h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                            {status === 'guest' ? 'Inicia sesión para interactuar con las herramientas de éxito.' : 'Tu cuenta está en revisión. Las herramientas se desbloquearán tras la aprobación.'}
-                        </p>
-                        <Button asChild className="btn-neon-primary w-full">
-                            <Link href={status === 'guest' ? '/login' : '/'}>
-                                {status === 'guest' ? 'INICIAR SESIÓN' : 'VOLVER AL INICIO'}
-                            </Link>
-                        </Button>
-                    </div>
-                </div>
-            )}
-            {/* Header Mobile-Optimized */}
-            <header className="animate-fade-in mb-6 flex flex-col md:flex-row md:items-start justify-between gap-4">
-                <div className="text-center md:text-left">
-                    <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 uppercase">Guía del <span className="text-primary">Éxito</span></h1>
-                    <p className="text-muted-foreground text-xs md:text-sm uppercase tracking-widest font-medium mb-4">Mapas de Operación Activos.</p>
-                </div>
-                <div className="flex flex-col gap-2 mx-auto md:mx-0">
-                    <Button
-                        onClick={() => setIsZenMode(!isZenMode)}
-                        variant="outline"
-                        className="border-primary/50 text-xs text-primary hover:bg-primary/10 transition-colors w-full md:w-fit shadow-[0_0_10px_rgba(255,211,0,0.1)]"
-                    >
-                        {isZenMode ? "← Volver a Vista Completa" : "🧘 Modo Zen (Simple)"}
-                    </Button>
-                </div>
-                {isLocked && (
-                    <div className="glass-card border-primary/50 bg-primary/5 p-4 rounded-2xl flex items-center justify-between gap-4 animate-slide-up text-left">
-                        <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-                                <Lock className="text-primary w-5 h-5" />
-                            </div>
-                            <div>
-                                <p className="text-xs font-bold text-primary uppercase tracking-widest">Modo Lectura</p>
-                                <p className="text-[10px] text-muted-foreground uppercase leading-tight">
-                                    {status === 'guest' ? 'Inicia sesión para usar las herramientas.' : 'Cuenta en revisión. Herramientas activas tras aprobación.'}
-                                </p>
-                            </div>
-                        </div>
-                        <Button onClick={() => setShowLockedModal(true)} variant="outline" size="sm" className="border-primary/50 text-xs hidden md:flex">Desbloquear</Button>
-                    </div>
-                )}
-            </header>
+          {/* Botón Google */}
+          <button
+            onClick={handleGoogle}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-3 py-3.5 px-4 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 hover:border-white/25 text-white font-medium transition-all mb-5 disabled:opacity-60"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+              <path d="M5.84 14.1c-.22-.66-.35-1.36-.35-2.1s.13-1.44.35-2.1V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.84z" fill="#FBBC05"/>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+            </svg>
+            Continuar con Google
+          </button>
 
-            {isZenMode ? (
-                <div className="space-y-6 animate-fade-in w-full max-w-md mx-auto mt-10">
-                    <div className="text-center mb-8">
-                        <h2 className="text-2xl font-bold text-white mb-2 uppercase tracking-tight">Modo <span className="text-primary">Simplificado</span></h2>
-                        <p className="text-sm text-muted-foreground">Tres acciones. Cero distracciones.</p>
-                    </div>
+          {/* Divisor */}
+          <div className="relative my-5 flex items-center">
+            <div className="flex-1 h-px bg-white/10" />
+            <span className="px-4 text-zinc-500 text-xs">o con email</span>
+            <div className="flex-1 h-px bg-white/10" />
+          </div>
 
-                    <Link href="/academia" className="block w-full">
-                        <button className="w-full relative group active:scale-[0.98] transition-all duration-300">
-                            <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-3xl blur opacity-30 group-hover:opacity-70 transition duration-500" />
-                            <div className="relative h-20 bg-black/40 border border-blue-500/30 hover:border-blue-500/80 rounded-3xl flex items-center justify-center gap-4 shadow-[0_0_20px_rgba(59,130,246,0.1)] overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/50">
-                                    <GraduationCap size={24} className="text-blue-400 group-hover:scale-110 transition-transform" />
-                                </div>
-                                <div className="text-left w-2/3">
-                                    <h3 className="text-lg font-bold text-white uppercase tracking-wider group-hover:text-blue-400 transition-colors">Academia</h3>
-                                    <p className="text-[10px] text-blue-400/80 uppercase tracking-widest truncate">Aprender las bases</p>
-                                </div>
-                            </div>
-                        </button>
-                    </Link>
-
-                    <OneClickShare />
-
-                    <a href="https://t.me/nikolalegadobot" target="_blank" rel="noopener noreferrer" className="block w-full">
-                        <button className="w-full relative group active:scale-[0.98] transition-all duration-300">
-                            <div className="absolute -inset-1 bg-gradient-to-r from-purple-500 to-fuchsia-500 rounded-3xl blur opacity-30 group-hover:opacity-70 transition duration-500" />
-                            <div className="relative h-20 bg-black/40 border border-purple-500/30 hover:border-purple-500/80 rounded-3xl flex items-center justify-center gap-4 shadow-[0_0_20px_rgba(168,85,247,0.1)] overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                                <div className="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center border border-purple-500/50">
-                                    <MessageSquare size={24} className="text-purple-400 group-hover:scale-110 transition-transform" />
-                                </div>
-                                <div className="text-left w-2/3">
-                                    <h3 className="text-lg font-bold text-white uppercase tracking-wider group-hover:text-purple-400 transition-colors">Soporte IA</h3>
-                                    <p className="text-[10px] text-purple-400/80 uppercase tracking-widest truncate">Hablar con Oráculo</p>
-                                </div>
-                            </div>
-                        </button>
-                    </a>
-                </div>
-            ) : (
-                <>
-                    {/* Timeline View para Guía del Éxito */}
-                    <div className="relative">
-                        {isLocked && <div className="absolute inset-0 z-20 bg-transparent cursor-pointer" onClick={() => setShowLockedModal(true)} />}
-                        <div className="relative border-l border-white/10 ml-4 md:ml-6 space-y-12 pb-8">
-                            {FASES.map((fase, i) => (
-                                <div key={i} className="relative animate-slide-up" style={{ animationDelay: `${i * 0.15}s` }}>
-
-                                    {/* Indicador de Fase */}
-                                    <div className="absolute -left-[21px] md:-left-[29px] w-10 h-10 md:w-14 md:h-14 rounded-full bg-[#0a0f1c] border-2 border-primary/50 flex items-center justify-center shadow-[0_0_15px_rgba(255,211,0,0.15)] z-10">
-                                        <span className="text-primary font-bold">{i + 1}</span>
-                                    </div>
-
-                                    <div className="pl-8 md:pl-12 pt-1 md:pt-3">
-                                        <h2 className="text-lg md:text-xl font-bold text-white mb-6 uppercase tracking-wider">{fase.nombre}</h2>
-
-                                        <div className="space-y-4">
-                                            {fase.pasos.map((paso) => (
-                                                <div
-                                                    key={paso.id}
-                                                    onClick={() => setSelectedStep({ id: paso.id, titulo: paso.titulo })}
-                                                    className="glass-card p-4 md:p-5 rounded-2xl border border-white/10 hover:border-primary/50 transition-all cursor-pointer group flex items-center gap-4 relative overflow-hidden active:scale-[0.98]"
-                                                    style={{ background: 'linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)' }}
-                                                >
-                                                    {/* Glow effect on hover */}
-                                                    <div className="absolute inset-0 bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                                                    <div className="w-12 h-12 shrink-0 rounded-xl bg-black/40 border border-white/5 group-hover:border-primary/30 flex items-center justify-center group-hover:scale-110 transition-all duration-300">
-                                                        {paso.icon}
-                                                    </div>
-
-                                                    <div className="flex-1 min-w-0">
-                                                        <div className="flex items-center gap-2 mb-0.5">
-                                                            <span className="text-[10px] font-bold text-primary uppercase tracking-widest bg-primary/10 px-2 py-0.5 rounded-sm">Paso {paso.id}</span>
-                                                        </div>
-                                                        <h3 className="font-bold text-white/90 group-hover:text-white truncate">{paso.titulo}</h3>
-                                                    </div>
-
-                                                    <div className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-white/5 border border-white/10 group-hover:bg-primary group-hover:text-black transition-colors">
-                                                        <Bot size={16} />
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Otras Herramientas */}
-                    <div className="relative mt-8">
-                        {isLocked && <div className="absolute inset-0 z-20 bg-transparent cursor-pointer" onClick={() => setShowLockedModal(true)} />}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <ProspectList prospects={prospects} isLoading={loadingProspects} />
-                            <div className="space-y-6">
-                                <GoalTracker goals={goals} isLoading={loadingGoals} />
-                                <DailyChecklist habit={habit} isLoading={loadingHabit} onSave={handleSaveHabit} />
-                            </div>
-                        </div>
-                    </div>
-                </>
-            )}
-
-            {/* IA Assistant Modal */}
-            {selectedStep && (
-                <AIAssistantModal
-                    isOpen={true}
-                    onClose={() => setSelectedStep(null)}
-                    stepTitle={selectedStep.titulo}
-                    stepId={selectedStep.id}
+          {/* Formulario */}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm text-zinc-300 mb-2">Email</label>
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <input
+                  name="email"
+                  type="email"
+                  placeholder="tu@email.com"
+                  required
+                  className="w-full bg-white/5 border border-white/15 rounded-xl py-3.5 pl-10 pr-4 text-white placeholder-zinc-600 focus:outline-none focus:border-purple-500/60 focus:bg-white/8 transition-all text-sm"
                 />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm text-zinc-300 mb-2">Contraseña</label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                <input
+                  name="password"
+                  type="password"
+                  placeholder="••••••••"
+                  required
+                  minLength={6}
+                  className="w-full bg-white/5 border border-white/15 rounded-xl py-3.5 pl-10 pr-4 text-white placeholder-zinc-600 focus:outline-none focus:border-purple-500/60 focus:bg-white/8 transition-all text-sm"
+                />
+              </div>
+            </div>
+
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3">
+                <p className="text-red-400 text-sm">{error}</p>
+              </div>
             )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-4 rounded-xl font-bold text-white text-base transition-all hover:opacity-90 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 shadow-[0_0_30px_rgba(168,85,247,0.3)]"
+              style={{ background: 'linear-gradient(135deg, #A855F7, #EC4899)' }}
+            >
+              {loading ? 'Procesando...' : mode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}
+            </button>
+          </form>
+
+          {/* Toggle entre login y signup */}
+          <div className="mt-5 text-center">
+            <button
+              onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError(null) }}
+              className="text-sm text-zinc-400 hover:text-purple-400 transition-colors"
+            >
+              {mode === 'login' 
+                ? '¿No tienes cuenta? Regístrate'
+                : '¿Ya tienes cuenta? Inicia sesión'
+              }
+            </button>
+          </div>
         </div>
-    )
+      </div>
+
+      <div className="h-24" />
+    </div>
+  )
+}
+
+// ─── Panel de Éxito ──────────────────────────────────────────────────────────
+function PanelExito({ isOpen, onToggle, isGuest }: { isOpen: boolean, onToggle: () => void, isGuest: boolean }) {
+  return (
+    <div className="border border-white/10 rounded-2xl overflow-hidden mb-4" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.08), rgba(6,182,212,0.04))' }}>
+      <button className="w-full flex items-center gap-4 p-4" onClick={onToggle}>
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #A855F7, #EC4899)' }}>
+          <Sparkles className="w-5 h-5 text-white" />
+        </div>
+        <div className="flex-1 text-left">
+          <p className="font-bold text-white text-sm">Mi Panel de Éxito</p>
+          {isGuest ? (
+            <p className="text-zinc-500 text-xs">Inicia sesión para ver tu progreso</p>
+          ) : (
+            <p className="text-zinc-400 text-xs">3 logros • 145 XP • 5 contactos</p>
+          )}
+        </div>
+        {isOpen ? <ChevronUp className="w-4 h-4 text-zinc-500" /> : <ChevronDown className="w-4 h-4 text-zinc-500" />}
+      </button>
+
+      {isOpen && !isGuest && (
+        <div className="px-4 pb-4 space-y-4 border-t border-white/5 pt-4">
+          {/* Stats Row */}
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              { label: 'XP Total', value: '145', color: '#CCFF00' },
+              { label: 'Logros', value: '3/8', color: '#A855F7' },
+              { label: 'Contactos', value: '5', color: '#06B6D4' },
+            ].map((stat) => (
+              <div key={stat.label} className="bg-white/5 border border-white/8 rounded-xl p-3 text-center">
+                <p className="font-black text-lg" style={{ color: stat.color }}>{stat.value}</p>
+                <p className="text-zinc-500 text-[10px] uppercase tracking-wider">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Mis Metas */}
+          <div className="bg-white/3 border border-white/8 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Target className="w-4 h-4" style={{ color: '#CCFF00' }} />
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#CCFF00' }}>MIS METAS</span>
+            </div>
+            <p className="text-zinc-400 text-sm italic">Completa el Paso 1 para ver tus metas aquí ✨</p>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Sección de Logros ───────────────────────────────────────────────────────
+function SeccionLogros({ logros, isGuest, onLoginRequest }: { logros: typeof LOGROS, isGuest: boolean, onLoginRequest: () => void }) {
+  const desbloqueados = logros.filter(l => l.desbloqueado).length
+  return (
+    <div className="bg-white/3 border border-white/8 rounded-2xl p-4 mb-4">
+      <div className="flex items-center gap-2 mb-4">
+        <Trophy className="w-5 h-5 text-yellow-400" />
+        <span className="text-sm font-bold text-yellow-400 uppercase tracking-widest">LOGROS ({desbloqueados}/{logros.length})</span>
+      </div>
+      <div className="grid grid-cols-4 gap-2">
+        {logros.map((logro) => (
+          <div
+            key={logro.titulo}
+            onClick={isGuest ? onLoginRequest : undefined}
+            className={`bg-black/40 border rounded-xl p-3 flex flex-col items-center gap-1.5 text-center cursor-pointer transition-all ${logro.desbloqueado && !isGuest ? 'border-opacity-100 hover:scale-105' : 'border-white/8 opacity-40 grayscale'}`}
+            style={logro.desbloqueado && !isGuest ? { borderColor: `${logro.color}50`, boxShadow: `0 0 12px ${logro.color}20` } : {}}
+          >
+            <span className="text-2xl">{logro.emoji}</span>
+            <span className="text-[9px] font-bold uppercase tracking-wide text-zinc-400 leading-tight">{logro.titulo}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ─── Componente Principal ────────────────────────────────────────────────────
+export default function SuccessGuideView() {
+  const { status, isPending } = useAuth()
+  const isGuest = status === 'guest'
+  const isLocked = isGuest || isPending
+
+  const [showLogin, setShowLogin] = useState(false)
+  const [panelOpen, setPanelOpen] = useState(false)
+  const [fasesAbiertas, setFasesAbiertas] = useState<Set<number>>(new Set([1]))
+
+  function toggleFase(n: number) {
+    setFasesAbiertas(prev => {
+      const next = new Set(prev)
+      next.has(n) ? next.delete(n) : next.add(n)
+      return next
+    })
+  }
+
+  function handleLockedClick() {
+    if (isLocked) setShowLogin(true)
+  }
+
+  return (
+    <div className="min-h-screen bg-[#0A0A0A] text-white pb-28 max-w-2xl mx-auto px-4 pt-6 relative">
+      {/* Modal de Login */}
+      {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
+
+      {/* Título de la página */}
+      <div className="text-center mb-6">
+        <h1 className="text-3xl font-bold tracking-tight mb-1">
+          Guía del{' '}
+          <span className="font-black" style={{ color: '#CCFF00' }}>Éxito</span>
+        </h1>
+        <p className="text-zinc-500 text-sm">9 Pasos • 3 Fases • IA Integrada</p>
+      </div>
+
+      {/* Banner Educativo */}
+      <div className="border border-yellow-500/30 bg-yellow-500/5 rounded-2xl p-4 flex gap-3 mb-5">
+        <AlertTriangle className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
+        <p className="text-yellow-200/80 text-xs leading-relaxed">
+          <strong className="text-yellow-400">⚠ MATERIAL CON FINES EDUCATIVOS:</strong> Este análisis es un caso de estudio sobre protocolos de economía descentralizada. No constituye asesoramiento financiero ni promesa de rendimientos. La tecnología blockchain conlleva riesgos que debes comprender antes de participar.
+        </p>
+      </div>
+
+      {/* Panel de Éxito */}
+      <PanelExito
+        isOpen={panelOpen}
+        onToggle={() => {
+          if (isGuest) { setShowLogin(true); return }
+          setPanelOpen(!panelOpen)
+        }}
+        isGuest={isGuest}
+      />
+
+      {/* Logros */}
+      <SeccionLogros logros={LOGROS} isGuest={isGuest} onLoginRequest={() => setShowLogin(true)} />
+
+      {/* Fases y Pasos */}
+      <div className="space-y-3">
+        {FASES.map((fase) => {
+          const abierta = fasesAbiertas.has(fase.numero)
+          return (
+            <div key={fase.numero} className="border border-white/8 rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.02)' }}>
+              {/* Header de la Fase */}
+              <button
+                className="w-full flex items-center gap-4 p-4 hover:bg-white/3 transition-colors"
+                onClick={() => toggleFase(fase.numero)}
+              >
+                <div className="w-9 h-9 rounded-full flex items-center justify-center font-black text-sm shrink-0 text-white" style={{ background: fase.color }}>
+                  {fase.numero}
+                </div>
+                <span className="flex-1 text-left text-sm font-bold uppercase tracking-wider" style={{ color: fase.color }}>
+                  {fase.nombre}
+                </span>
+                <span className="text-xs text-zinc-500">{fase.pasos.length} pasos</span>
+                {abierta ? <ChevronUp className="w-4 h-4 text-zinc-500" /> : <ChevronDown className="w-4 h-4 text-zinc-500" />}
+              </button>
+
+              {/* Pasos de la Fase */}
+              {abierta && (
+                <div className="border-t border-white/5 divide-y divide-white/5">
+                  {fase.pasos.map((paso) => (
+                    <button
+                      key={paso.id}
+                      onClick={isLocked ? handleLockedClick : undefined}
+                      className="w-full flex items-center gap-4 p-4 hover:bg-white/3 transition-all text-left group relative"
+                    >
+                      {isLocked && (
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/30 backdrop-blur-[1px] rounded-none">
+                          <span className="text-xs font-bold text-white bg-purple-600 px-3 py-1.5 rounded-full">Iniciar sesión</span>
+                        </div>
+                      )}
+                      {/* Número del paso */}
+                      <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 font-bold text-zinc-400 text-sm">
+                        {paso.id}
+                      </div>
+                      {/* Contenido */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="text-[10px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded text-white/70" style={{ background: `${fase.color}20`, color: fase.color }}>Paso {paso.id}</span>
+                        </div>
+                        <p className="font-bold text-white text-sm truncate">{paso.titulo}</p>
+                        <p className="text-zinc-500 text-[11px] truncate">{paso.desc}</p>
+                      </div>
+                      {/* XP Badge */}
+                      <span className="text-[10px] font-black px-2 py-1 rounded-full shrink-0" style={{ color: '#CCFF00', background: 'rgba(204,255,0,0.1)' }}>
+                        {paso.xp}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      {/* CTA de login si no está autenticado */}
+      {isGuest && (
+        <div className="mt-6 border border-purple-500/30 rounded-2xl p-5 text-center" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.08), rgba(236,72,153,0.04))' }}>
+          <Sparkles className="w-8 h-8 mx-auto mb-3 text-purple-400" />
+          <p className="text-white font-bold mb-1">¡Inicia tu viaje!</p>
+          <p className="text-zinc-400 text-sm mb-4">Crea tu cuenta gratuita y desbloquea los 9 pasos de la Guía del Éxito.</p>
+          <button
+            onClick={() => setShowLogin(true)}
+            className="px-8 py-3 rounded-xl font-bold text-white text-sm transition-all hover:opacity-90 hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(168,85,247,0.3)]"
+            style={{ background: 'linear-gradient(135deg, #A855F7, #EC4899)' }}
+          >
+            Iniciar Sesión / Registrarse
+          </button>
+        </div>
+      )}
+
+      {/* Botón Pregúntale a Legao */}
+      <div className="fixed bottom-20 left-4 z-50">
+        <button className="flex items-center gap-2 py-3 px-4 rounded-2xl font-bold text-black text-sm shadow-2xl hover:scale-105 transition-transform" style={{ background: 'linear-gradient(135deg, #A855F7, #06B6D4)' }}>
+          <Bot className="w-5 h-5 text-white" />
+          <span className="text-white">Pregúntale a Legao</span>
+          <div className="w-2.5 h-2.5 bg-[#16C10E] border-2 border-black rounded-full absolute -top-1 -right-1" />
+        </button>
+      </div>
+    </div>
+  )
 }

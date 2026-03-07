@@ -23,8 +23,8 @@ const HamburgerMenu = () => {
         { path: '/agentes', label: 'Agentes IA', icon: Play },
         { path: '/guia', label: 'Guía de Éxito', icon: Map },
         { path: '/academia', label: 'Academia', icon: GraduationCap },
-        { path: '/mi-equipo', label: 'Mi Equipo', icon: Users, requireAuth: true },
-        { path: '/mi-cuenta', label: 'Mi Cuenta', icon: User, requireAuth: true },
+        { path: '/equipo', label: 'Mi Equipo', icon: Users, requireAuth: true },
+        { path: '/cuenta', label: 'Mi Cuenta', icon: User, requireAuth: true },
         { path: '/admin', label: 'Panel Admin', icon: Shield, requireAuth: true, requireAdmin: true },
         { path: '/contacto', label: 'Contacto', icon: MessageCircle },
     ];

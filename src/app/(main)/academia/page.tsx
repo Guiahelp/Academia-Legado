@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Play, Pause, X, Sparkles, Shield, Cpu, Link, Wallet, Globe, Bot, Scale, Rocket, Brain, Users, Target, TrendingUp, Zap, Lock, Lightbulb, DollarSign, Key, Eye, Network, Mic, Loader2, Clock } from "lucide-react";
 import LevelCard from "@/features/academy/components/LevelCard";
 import VideoPopup from "@/features/academy/components/VideoPopup";
@@ -13,6 +13,9 @@ import { AIAgentSupport } from "@/features/academy/components/AIAgentSupport";
 import { useAcademyAccess } from "@/features/academy/hooks/useAcademyAccess";
 import { useAcademyProgress } from "@/features/academy/hooks/useAcademyProgress";
 import { useAuth } from "@/features/auth/contexts/AuthContext";
+import { ProgressDashboard } from "@/features/courses/components/ProgressDashboard";
+import { ProgressSkeleton } from "@/features/courses/components/ProgressSkeleton";
+import { ProgressErrorBoundary } from "@/features/courses/components/ProgressErrorBoundary";
 
 const ORACULO_AUDIO = "https://jnvpzjjgcdclcwgjgkpk.supabase.co/storage/v1/object/public/assets/voz-oraculo.MP3";
 const ALBERT_IMAGE = "https://iughqygysiictpqvcgxq.supabase.co/storage/v1/object/public/assets/Tribu/albert.webp";
@@ -212,6 +215,12 @@ export default function AcademiaPage() {
                 </h1>
                 <p className="text-muted-foreground text-sm uppercase tracking-widest font-medium">4 Niveles • Progresión Desbloqueada</p>
             </div>
+
+            <ProgressErrorBoundary>
+                <React.Suspense fallback={<ProgressSkeleton />}>
+                    <ProgressDashboard />
+                </React.Suspense>
+            </ProgressErrorBoundary>
 
             {!(hasAccess || localAccess) && (
                 <div className="flex justify-center mb-8">

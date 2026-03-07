@@ -2,47 +2,33 @@ import React from 'react';
 
 export function CoursePlayerSkeleton() {
     return (
-        <div className="w-full max-w-5xl mx-auto space-y-8 animate-pulse p-4 md:p-0">
-            {/* Header Skeleton */}
-            <div className="glass-card border-2 border-primary/10 p-8 mb-8 relative overflow-hidden">
-                <div className="h-6 bg-primary/20 rounded-full w-24 mb-4"></div>
-                <div className="h-10 bg-white/10 rounded-lg w-2/3 mb-4"></div>
-                <div className="h-4 bg-white/5 rounded-lg w-1/2"></div>
+        <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-between p-4 md:p-8 animate-pulse">
+            {/* Top Navigation Bar Skeleton */}
+            <div className="w-full max-w-5xl flex items-center justify-center relative mt-2 md:mt-4">
+                <div className="absolute left-0 lg:left-12 w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/5"></div>
+                
+                <div className="h-6 md:h-8 w-1/3 bg-white/10 rounded-full"></div>
+                
+                <div className="absolute right-0 lg:right-12 w-12 h-12 md:w-14 md:h-14 rounded-full bg-white/5"></div>
             </div>
 
-            {/* Content Area Skeleton */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Main View Area */}
-                <div className="lg:col-span-2 space-y-6">
-                    <div className="aspect-video bg-black/40 rounded-2xl border-2 border-secondary/10 glass-card"></div>
-                    
-                    <div className="glass-card p-8 border-t-2 border-primary/10">
-                        <div className="h-6 bg-primary/20 rounded-lg w-1/4 mb-6"></div>
-                        <div className="space-y-3">
-                            <div className="h-4 bg-white/5 rounded-lg w-full"></div>
-                            <div className="h-4 bg-white/5 rounded-lg w-5/6"></div>
-                            <div className="h-4 bg-white/5 rounded-lg w-4/6"></div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Sidebar Lessons Pipeline */}
-                <div className="glass-card p-6 h-fit border-2 border-white/5">
-                    <div className="h-6 bg-white/10 rounded-lg w-1/2 mb-6"></div>
-                    <div className="space-y-4">
-                        {[1, 2, 3, 4, 5].map((i) => (
-                            <div key={i} className="flex gap-4 items-center p-4 rounded-xl glass-card bg-transparent border border-white/5">
-                                <div className="w-10 h-10 rounded-lg bg-white/5 shrink-0"></div>
-                                <div className="space-y-2 flex-1">
-                                    <div className="h-4 bg-white/10 rounded-lg w-full"></div>
-                                    <div className="h-3 bg-white/5 rounded-lg w-1/2"></div>
-                                </div>
-                                <div className="w-6 h-6 rounded-full border border-white/10 shrink-0"></div>
-                            </div>
-                        ))}
-                    </div>
+            {/* Video Container Skeleton */}
+            <div className="w-full max-w-4xl aspect-[16/10] sm:aspect-video bg-[#0c0c0c] rounded-2xl flex flex-col items-center justify-center relative overflow-hidden my-auto border border-white/5">
+                <div className="flex flex-col items-center gap-4 w-full px-6">
+                    <div className="h-4 w-3/4 max-w-xs bg-white/5 rounded-full"></div>
+                    <div className="h-12 w-40 bg-white/10 rounded-full mt-2"></div>
                 </div>
             </div>
+
+            {/* Bottom Action Button Skeleton */}
+            <div className="w-full max-w-3xl mb-4 md:mb-12 mx-auto">
+                <div className="w-full h-14 md:h-16 bg-[#16C10E]/20 rounded-xl relative overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#16C10E]/10 to-transparent -translate-x-full animate-[shimmer_2s_infinite]"></div>
+                </div>
+            </div>
+            
+            {/* Floating 'Pregúntale a Legao' Skeleton */}
+            <div className="fixed bottom-6 left-6 hidden md:flex w-56 h-12 bg-white/5 rounded-2xl shadow-2xl z-50"></div>
         </div>
     );
 }

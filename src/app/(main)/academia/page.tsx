@@ -178,20 +178,42 @@ export default function AcademiaPage() {
                 </div>
             )}
 
-            {showOraculo && (true /* TEMPORALMENTE DESBLOQUEADO: hasAccess || localAccess */) && (
-                <div className="glass-card p-5 rounded-2xl mb-8 border-2 border-secondary/20 shadow-neon-accent animate-slide-up">
+            {showOraculo && (
+                <div className="relative glass-card rounded-2xl mb-8 border-2 border-secondary/20 shadow-neon-accent animate-slide-up overflow-hidden">
                     <audio ref={audioRef} src={ORACULO_AUDIO} />
-                    <div className="flex flex-col gap-4">
+
+                    {/* Pantalla de inicio — igual que Albert */}
+                    {!isPlaying && (
+                        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/80 backdrop-blur-sm rounded-2xl">
+                            <div className="text-center p-6 space-y-4">
+                                <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto border border-primary/40 shadow-[0_0_20px_rgba(217,70,239,0.4)]">
+                                    <img src={ALBERT_IMAGE} alt="Albert" className="w-full h-full object-cover rounded-full opacity-90" />
+                                </div>
+                                <p className="text-xs text-zinc-400 uppercase tracking-widest">Mensaje del Oráculo</p>
+                                <button
+                                    onClick={togglePlay}
+                                    className="flex items-center gap-2 mx-auto px-6 py-3 rounded-xl font-bold text-white text-sm uppercase tracking-widest"
+                                    style={{ background: 'linear-gradient(135deg, #D946EF, #A855F7)' }}
+                                >
+                                    <Play size={18} className="fill-white" />
+                                    ESCUCHAR AL ORÁCULO
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Contenido del Oráculo */}
+                    <div className="p-5 flex flex-col gap-4">
                         <div className="flex items-start gap-4">
-                            <div className="w-14 h-14 rounded-full bg-black flex items-center justify-center flex-shrink-0 border-2 border-primary/50 overflow-hidden relative shadow-[0_0_15px_rgba(217,70,239,0.3)]">
+                            <div className="w-14 h-14 rounded-full bg-black flex items-center justify-center flex-shrink-0 border-2 border-primary/50 overflow-hidden shadow-[0_0_15px_rgba(217,70,239,0.3)]">
                                 <img src={ALBERT_IMAGE} alt="Albert" className="w-full h-full object-cover opacity-90" />
                             </div>
                             <div className="flex-1">
                                 <div className="flex items-center justify-between mb-2">
                                     <h3 className="font-bold text-primary text-lg uppercase tracking-wider">El Oráculo (Albert)</h3>
                                     <div className="flex items-center gap-2">
-                                        <button onClick={togglePlay} className={`p-2 rounded-full transition-colors ${isPlaying ? 'bg-primary/20 hover:bg-primary/30' : 'bg-primary/20 hover:bg-primary/30'} flex items-center gap-2 text-xs font-bold uppercase`}>
-                                            {isPlaying ? <><Pause size={16} className="text-primary" /> <span className="text-primary hidden sm:inline">Pausar</span></> : <><Play size={16} className="text-primary" /> <span className="text-primary hidden sm:inline">Escuchar</span></>}
+                                        <button onClick={togglePlay} className="p-2 rounded-full bg-primary/20 hover:bg-primary/30 transition-colors flex items-center gap-2 text-xs font-bold uppercase">
+                                            {isPlaying ? <><Pause size={16} className="text-primary" /><span className="text-primary hidden sm:inline">Pausar</span></> : <><Play size={16} className="text-primary" /><span className="text-primary hidden sm:inline">Escuchar</span></>}
                                         </button>
                                         <button onClick={() => setShowOraculo(false)} className="p-2 rounded-full hover:bg-white/10 transition-colors">
                                             <X size={16} />
@@ -200,7 +222,7 @@ export default function AcademiaPage() {
                                 </div>
                             </div>
                         </div>
-                        <div className="text-sm text-muted-foreground leading-relaxed max-h-48 overflow-y-auto pr-2 scrollbar-hide space-y-3">
+                        <div className="text-sm text-muted-foreground leading-relaxed space-y-3">
                             <p>Bienvenido a la Academia Legado. Soy Albert, tu Oráculo.</p>
                             <p>Frente a ti tienes el mapa maestro. Hemos condensado todo el poder del sistema Tribu y la blockchain en esta biblioteca de videos y guías.</p>
                             <p>Tu primera misión es absorber este conocimiento. Las respuestas que buscas para recibir tus beneficios ya están grabadas aquí abajo.</p>

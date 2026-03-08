@@ -40,12 +40,7 @@ export function ProgressDashboard() {
     }, []);
 
     if (!hasSession && !loading) {
-        return (
-            <div className="p-4 rounded-xl border border-destructive/20 bg-destructive/10 text-center animate-fade-in shadow-[0_0_15px_rgba(255,0,0,0.1)]">
-                <h3 className="text-destructive font-bold uppercase tracking-wider mb-1">Sin sesión activa</h3>
-                <p className="text-sm text-muted-foreground">Debes iniciar sesión para ver tu progreso avalado por la Blockchain de Supabase.</p>
-            </div>
-        );
+        return null; // Visitantes sin sesión simplemente no ven el dashboard de progreso
     }
 
     if (loading) return null;

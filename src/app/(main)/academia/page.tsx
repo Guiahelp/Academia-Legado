@@ -101,13 +101,12 @@ export default function AcademiaPage() {
     }, [completedVideos]);
 
     useEffect(() => {
-        if (showOraculo && audioRef.current && (hasAccess || localAccess || status === 'guest' || isPending)) {
-            // Intentar autoplay, si falla el usuario usará el botón Play
+        if (showOraculo && audioRef.current) {
+            // Auto-reproducir para todos los visitantes igual que Albert y Nikola
             audioRef.current.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false));
-
             audioRef.current.onended = () => setIsPlaying(false);
         }
-    }, [showOraculo, hasAccess, localAccess, status, isPending]);
+    }, [showOraculo]);
 
     const togglePlay = () => {
         if (audioRef.current) {
@@ -149,8 +148,10 @@ export default function AcademiaPage() {
     };
 
     const _isLevelUnlockedFinal = (levelNumber: number) => {
+        // Nivel 0 siempre libre para todos; niveles 1-3 requieren acceso
+        if (levelNumber === 0) return true;
         if (isPending || status === 'guest') return false;
-        return levelNumber === 0 || ((hasAccess || localAccess) && isLevelUnlocked(levelNumber));
+        return (hasAccess || localAccess) && isLevelUnlocked(levelNumber);
     };
 
     if (isAccessLoading || loadingProgress) return (
